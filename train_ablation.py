@@ -6,7 +6,6 @@ import json
 import time
 import argparse
 from collections import deque
-from typing import Dict, Any, Callable
 
 import cv2
 import numpy as np
@@ -29,10 +28,6 @@ from stable_baselines3.common.evaluation import evaluate_policy
 MAX_STEPS = 1000
 EVAL_EPISODES = 5
 
-
-# ============================================================
-# Wrappers base
-# ============================================================
 
 class StepLimitWrapper(gym.Wrapper):
     def __init__(self, env, max_steps=1000):
@@ -78,7 +73,7 @@ class FrameStack(gym.ObservationWrapper):
     def _get_obs(self, obs):
         return {
             "image": np.concatenate(list(self.frames), axis=0),
-            "features": obs["features"]
+            "features": obs["features"],
         }
 
 
@@ -97,10 +92,7 @@ class ResizeObservation(gym.ObservationWrapper):
         if img.shape[0] == 3:
             img = img.transpose(1, 2, 0)
         resized = cv2.resize(img, self.shape)
-        return {
-            "image": resized.transpose(2, 0, 1),
-            "features": obs["features"]
-        }
+        return {"image": resized.transpose(2, 0, 1), "features": obs["features"]}
 
 
 class DictObservationWrapper(gym.ObservationWrapper):
@@ -112,7 +104,7 @@ class DictObservationWrapper(gym.ObservationWrapper):
             "image": img_space,
             "features": gym.spaces.Box(
                 low=-np.inf, high=np.inf, shape=(feat_dim,), dtype=np.float32
-            )
+            ),
         })
 
     def observation(self, obs):
@@ -140,7 +132,6 @@ class CurriculumRewardWrapper(gym.Wrapper):
     def step(self, action):
         obs, _, done, truncated, info = self.env.step(action)
         self.current_step += 1
-
         alpha = min(1.0, (self.current_step / self.total_steps) ** 2)
 
         features = obs["features"]
@@ -153,7 +144,6 @@ class CurriculumRewardWrapper(gym.Wrapper):
 
         reach_reward = -dist_hand_obj * 5
         push_reward = -dist_obj_goal * 5
-
         reward = (1 - alpha) * reach_reward + alpha * push_reward
 
         if dist_hand_obj < 0.1:
@@ -165,33 +155,23 @@ class CurriculumRewardWrapper(gym.Wrapper):
         return obs, reward, done, truncated, info
 
 
-# ============================================================
-# Observation variants
-# ============================================================
-
 class FeaturesOnlyWrapper(gym.ObservationWrapper):
-    def __init__(self, env: gym.Env):
+    def __init__(self, env):
         super().__init__(env)
-        feat_space = env.observation_space["features"]
-        self.observation_space = feat_space
+        self.observation_space = env.observation_space["features"]
 
     def observation(self, obs):
         return obs["features"]
 
 
 class ImagesOnlyWrapper(gym.ObservationWrapper):
-    def __init__(self, env: gym.Env):
+    def __init__(self, env):
         super().__init__(env)
-        img_space = env.observation_space["image"]
-        self.observation_space = img_space
+        self.observation_space = env.observation_space["image"]
 
     def observation(self, obs):
         return obs["image"]
 
-
-# ============================================================
-# Feature extractors
-# ============================================================
 
 class CombinedExtractor(BaseFeaturesExtractor):
     def __init__(self, observation_space: gym.spaces.Dict,
@@ -213,9 +193,7 @@ class CombinedExtractor(BaseFeaturesExtractor):
         with torch.no_grad():
             n_flat = self.cnn(torch.as_tensor(img_space.sample()[None]).float()).shape[1]
 
-        self.cnn_linear = nn.Sequential(
-            nn.Linear(n_flat, cnn_output_dim), nn.ReLU()
-        )
+        self.cnn_linear = nn.Sequential(nn.Linear(n_flat, cnn_output_dim), nn.ReLU())
         self.mlp = nn.Sequential(
             nn.Linear(feat_space.shape[0], 64), nn.ReLU(),
             nn.Linear(64, mlp_output_dim), nn.ReLU()
@@ -224,17 +202,14 @@ class CombinedExtractor(BaseFeaturesExtractor):
     def forward(self, observations):
         img = observations["image"].float() / 255.0
         feat = observations["features"].float()
-        return torch.cat([
-            self.cnn_linear(self.cnn(img)),
-            self.mlp(feat)
-        ], dim=1)
+        return torch.cat([self.cnn_linear(self.cnn(img)), self.mlp(feat)], dim=1)
 
 
 class CNNOnlyExtractor(BaseFeaturesExtractor):
     def __init__(self, observation_space: gym.spaces.Box, cnn_output_dim: int = 256):
         super().__init__(observation_space, features_dim=cnn_output_dim)
-
         n_ch = observation_space.shape[0]
+
         self.cnn = nn.Sequential(
             nn.Conv2d(n_ch, 32, kernel_size=8, stride=4), nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=3, stride=2), nn.ReLU(),
@@ -254,37 +229,27 @@ class CNNOnlyExtractor(BaseFeaturesExtractor):
         return self.linear(self.cnn(img))
 
 
-# ============================================================
-# Metrics callback
-# ============================================================
-
 class MetricsCallback(BaseCallback):
     def __init__(self, verbose=0):
         super().__init__(verbose)
         self.episode_rewards = []
-        self.episode_lengths = []
         self.timesteps_at_ep = []
 
     def _on_step(self) -> bool:
         for info in self.locals.get("infos", []):
             if "episode" in info:
                 self.episode_rewards.append(info["episode"]["r"])
-                self.episode_lengths.append(info["episode"]["l"])
                 self.timesteps_at_ep.append(self.num_timesteps)
         return True
 
 
-# ============================================================
-# Env factory
-# ============================================================
-
-def make_env(variant: str, total_steps: int, img_size: int = 64, frame_stack_k: int = 3):
+def make_env(variant: str, total_steps: int, img_size: int = 64):
     def _init():
         env = gym.make("Pusher-v5", render_mode="rgb_array")
         env = gym.wrappers.AddRenderObservation(env)
         env = DictObservationWrapper(env)
         env = ResizeObservation(env, (img_size, img_size))
-        env = FrameStack(env, k=frame_stack_k)
+        env = FrameStack(env, k=3)
 
         if variant != "multimodal_no_curriculum":
             env = CurriculumRewardWrapper(env, total_steps=total_steps)
@@ -300,70 +265,82 @@ def make_env(variant: str, total_steps: int, img_size: int = 64, frame_stack_k: 
     return _init
 
 
-# ============================================================
-# Train/eval helpers
-# ============================================================
-
-def save_learning_curve(cb: MetricsCallback, run_dir: str, title: str):
+def save_learning_curve(cb: MetricsCallback, out_path: str, title: str):
     if not cb.episode_rewards:
         return
-
     fig, ax = plt.subplots(figsize=(8, 4))
-    ax.plot(cb.timesteps_at_ep, cb.episode_rewards, alpha=0.35, linewidth=0.8, color="#B39DDB")
-
+    ax.plot(cb.timesteps_at_ep, cb.episode_rewards, alpha=0.35, linewidth=0.8, color="#90CAF9")
     if len(cb.episode_rewards) >= 10:
         window = max(10, len(cb.episode_rewards) // 20)
         smoothed = np.convolve(cb.episode_rewards, np.ones(window) / window, mode="valid")
         x_sm = cb.timesteps_at_ep[window - 1:]
-        ax.plot(x_sm, smoothed, linewidth=2, color="#5E35B1", label="Smoothed")
-
+        ax.plot(x_sm, smoothed, linewidth=2, color="#1565C0", label="Smoothed")
+        ax.legend()
     ax.set_xlabel("Timesteps")
     ax.set_ylabel("Episode reward")
     ax.set_title(title)
-    ax.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(run_dir, "learning_curve.png"), dpi=120)
+    plt.savefig(out_path, dpi=120)
     plt.close(fig)
 
 
-def make_model(variant: str, env, device: str, learning_rate: float, batch_size: int,
-               buffer_size: int, learning_starts: int, train_freq: int, gradient_steps: int):
+def build_model(variant: str, env, device: str):
     if variant in ("multimodal_curriculum", "multimodal_no_curriculum"):
-        policy = "MultiInputPolicy"
-        policy_kwargs = dict(
-            features_extractor_class=CombinedExtractor,
-            features_extractor_kwargs=dict(cnn_output_dim=256, mlp_output_dim=64),
+        return SAC(
+            "MultiInputPolicy",
+            env,
+            policy_kwargs=dict(
+                features_extractor_class=CombinedExtractor,
+                features_extractor_kwargs=dict(cnn_output_dim=256, mlp_output_dim=64),
+            ),
+            learning_rate=1e-3,
+            batch_size=256,
+            buffer_size=100_000,
+            learning_starts=5_000,
+            train_freq=1,
+            gradient_steps=1,
+            verbose=0,
+            tensorboard_log=None,
+            device=device,
         )
-    elif variant == "images_only":
-        policy = "CnnPolicy"
-        policy_kwargs = dict(
-            features_extractor_class=CNNOnlyExtractor,
-            features_extractor_kwargs=dict(cnn_output_dim=256),
+    if variant == "images_only":
+        return SAC(
+            "CnnPolicy",
+            env,
+            policy_kwargs=dict(
+                features_extractor_class=CNNOnlyExtractor,
+                features_extractor_kwargs=dict(cnn_output_dim=256),
+            ),
+            learning_rate=1e-3,
+            batch_size=256,
+            buffer_size=100_000,
+            learning_starts=5_000,
+            train_freq=1,
+            gradient_steps=1,
+            verbose=0,
+            tensorboard_log=None,
+            device=device,
         )
-    elif variant == "features_only":
-        policy = "MlpPolicy"
-        policy_kwargs = dict(net_arch=[256, 256])
-    else:
-        raise ValueError(f"Unknown variant: {variant}")
-
-    return SAC(
-        policy,
-        env,
-        policy_kwargs=policy_kwargs,
-        learning_rate=learning_rate,
-        batch_size=batch_size,
-        buffer_size=buffer_size,
-        learning_starts=learning_starts,
-        train_freq=train_freq,
-        gradient_steps=gradient_steps,
-        verbose=0,
-        tensorboard_log=None,
-        device=device,
-    )
+    if variant == "features_only":
+        return SAC(
+            "MlpPolicy",
+            env,
+            policy_kwargs=dict(net_arch=[256, 256]),
+            learning_rate=1e-3,
+            batch_size=256,
+            buffer_size=100_000,
+            learning_starts=5_000,
+            train_freq=1,
+            gradient_steps=1,
+            verbose=0,
+            tensorboard_log=None,
+            device=device,
+        )
+    raise ValueError(f"Variant desconocida: {variant}")
 
 
-def train_one_variant(variant: str, run_dir: str, timesteps: int, device: str, img_size: int = 64) -> Dict[str, Any]:
-    os.makedirs(run_dir, exist_ok=True)
+def train_variant(variant: str, out_dir: str, timesteps: int, img_size: int, device: str):
+    os.makedirs(out_dir, exist_ok=True)
 
     train_env = DummyVecEnv([make_env(variant, timesteps, img_size=img_size)])
     train_env = VecNormalize(train_env, norm_obs=False, norm_reward=True)
@@ -371,23 +348,12 @@ def train_one_variant(variant: str, run_dir: str, timesteps: int, device: str, i
     eval_env = DummyVecEnv([make_env(variant, timesteps, img_size=img_size)])
     eval_env = VecNormalize(eval_env, norm_obs=False, norm_reward=False, training=False)
 
-    model = make_model(
-        variant=variant,
-        env=train_env,
-        device=device,
-        learning_rate=1e-3,
-        batch_size=256,
-        buffer_size=100_000,
-        learning_starts=5_000,
-        train_freq=1,
-        gradient_steps=1,
-    )
-
+    model = build_model(variant, train_env, device=device)
     metrics_cb = MetricsCallback()
     eval_cb = EvalCallback(
         eval_env,
-        best_model_save_path=run_dir,
-        log_path=run_dir,
+        best_model_save_path=out_dir,
+        log_path=out_dir,
         eval_freq=max(timesteps // 10, 5000),
         n_eval_episodes=3,
         deterministic=True,
@@ -399,13 +365,15 @@ def train_one_variant(variant: str, run_dir: str, timesteps: int, device: str, i
     elapsed = time.time() - t0
 
     mean_r, std_r = evaluate_policy(
-        model, eval_env, n_eval_episodes=EVAL_EPISODES,
-        deterministic=True, return_episode_rewards=False
+        model, eval_env,
+        n_eval_episodes=EVAL_EPISODES,
+        deterministic=True,
+        return_episode_rewards=False,
     )
 
-    model.save(os.path.join(run_dir, "model_final"))
-    train_env.save(os.path.join(run_dir, "vecnorm.pkl"))
-    save_learning_curve(metrics_cb, run_dir, f"Ablation — {variant}")
+    model.save(os.path.join(out_dir, "model_final"))
+    train_env.save(os.path.join(out_dir, "vecnorm.pkl"))
+    save_learning_curve(metrics_cb, os.path.join(out_dir, "learning_curve.png"), f"Ablation — {variant}")
 
     train_env.close()
     eval_env.close()
@@ -419,36 +387,26 @@ def train_one_variant(variant: str, run_dir: str, timesteps: int, device: str, i
     }
 
 
-def save_ablation_comparison(results: list[dict], out_dir: str):
-    summary_path = os.path.join(out_dir, "ablation_summary.json")
-    with open(summary_path, "w") as f:
-        json.dump(results, f, indent=2)
-
+def save_ablation_plot(results, out_path: str):
     labels = [r["variant"] for r in results]
     means = [r["metrics"]["mean_reward"] for r in results]
     stds = [r["metrics"]["std_reward"] for r in results]
 
     fig, ax = plt.subplots(figsize=(9, 5))
-    colors = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"]
-    ax.bar(range(len(labels)), means, yerr=stds, capsize=4, color=colors[:len(labels)])
+    colors = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"][:len(labels)]
+    ax.bar(range(len(labels)), means, yerr=stds, capsize=4, color=colors)
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=15, ha="right")
     ax.set_ylabel("Mean Eval Reward")
     ax.set_title("Ablation Study — Final Evaluation")
     plt.tight_layout()
-    fig.savefig(os.path.join(out_dir, "ablation_comparison.png"), dpi=140)
+    plt.savefig(out_path, dpi=140)
     plt.close(fig)
-
-    print(f"[saved] {summary_path}")
-    print(f"[saved] {os.path.join(out_dir, 'ablation_comparison.png')}")
+    print(f"[saved] {out_path}")
 
 
-# ============================================================
-# CLI
-# ============================================================
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Ablation study for SAC Pusher")
+def main():
+    parser = argparse.ArgumentParser(description="Run ablation study for SAC Pusher")
     parser.add_argument("--out_dir", type=str, default="./ablation_results")
     parser.add_argument("--timesteps", type=int, default=100_000)
     parser.add_argument("--img_size", type=int, default=64)
@@ -459,30 +417,31 @@ def parse_args():
         default=["multimodal_curriculum", "multimodal_no_curriculum", "features_only", "images_only"],
         choices=["multimodal_curriculum", "multimodal_no_curriculum", "features_only", "images_only"],
     )
-    return parser.parse_args()
+    args = parser.parse_args()
 
-
-def main():
-    args = parse_args()
     device = args.device if torch.cuda.is_available() else "cpu"
     os.makedirs(args.out_dir, exist_ok=True)
 
     all_results = []
     for variant in args.variants:
-        print(f"\n=== Running ablation: {variant} ===")
+        print(f"\n=== {variant} ===")
         run_dir = os.path.join(args.out_dir, variant)
-        metrics = train_one_variant(
+        metrics = train_variant(
             variant=variant,
-            run_dir=run_dir,
+            out_dir=run_dir,
             timesteps=args.timesteps,
-            device=device,
             img_size=args.img_size,
+            device=device,
         )
-        result = {"variant": variant, "metrics": metrics}
-        all_results.append(result)
-        print(f"  -> mean_reward={metrics['mean_reward']:.2f} ± {metrics['std_reward']:.2f} | time={metrics['elapsed_sec']:.0f}s")
+        all_results.append({"variant": variant, "metrics": metrics})
+        print(f"mean_reward={metrics['mean_reward']:.2f} ± {metrics['std_reward']:.2f} | time={metrics['elapsed_sec']:.0f}s")
 
-    save_ablation_comparison(all_results, args.out_dir)
+    summary_path = os.path.join(args.out_dir, "ablation_summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(all_results, f, indent=2)
+
+    save_ablation_plot(all_results, os.path.join(args.out_dir, "ablation_comparison.png"))
+    print(f"[saved] {summary_path}")
 
 
 if __name__ == "__main__":
