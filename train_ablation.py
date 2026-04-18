@@ -373,7 +373,7 @@ def train_variant(variant: str, out_dir: str, timesteps: int, img_size: int, dev
 
     model.save(os.path.join(out_dir, "model_final"))
     train_env.save(os.path.join(out_dir, "vecnorm.pkl"))
-    save_learning_curve(metrics_cb, os.path.join(out_dir, "learning_curve.png"), f"Ablation — {variant}")
+    save_learning_curve(metrics_cb, os.path.join(out_dir, "learning_curve.png"), f"Ablation ? {variant}")
 
     train_env.close()
     eval_env.close()
@@ -398,7 +398,7 @@ def save_ablation_plot(results, out_path: str):
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels, rotation=15, ha="right")
     ax.set_ylabel("Mean Eval Reward")
-    ax.set_title("Ablation Study — Final Evaluation")
+    ax.set_title("Ablation Study ? Final Evaluation")
     plt.tight_layout()
     plt.savefig(out_path, dpi=140)
     plt.close(fig)
@@ -434,7 +434,7 @@ def main():
             device=device,
         )
         all_results.append({"variant": variant, "metrics": metrics})
-        print(f"mean_reward={metrics['mean_reward']:.2f} ± {metrics['std_reward']:.2f} | time={metrics['elapsed_sec']:.0f}s")
+        print(f"mean_reward={metrics['mean_reward']:.2f} � {metrics['std_reward']:.2f} | time={metrics['elapsed_sec']:.0f}s")
 
     summary_path = os.path.join(args.out_dir, "ablation_summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:

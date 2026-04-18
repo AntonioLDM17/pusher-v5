@@ -231,7 +231,7 @@ def resolve_model_path(model_arg: str) -> str:
                 return c
 
     raise FileNotFoundError(
-        f"No se encontró el modelo en '{model_arg}'. "
+        f"No se encontr� el modelo en '{model_arg}'. "
         f"Prueba con una ruta .zip existente, por ejemplo "
         f"'./grid_results/run002_lr1e-03_mlp64_img64/model_final.zip'."
     )
@@ -306,12 +306,12 @@ def save_saliency_summary(frames_rgb, saliency_maps, episode_idx: int, out_dir: 
         axes[1, i].set_title("Saliency overlay", fontsize=9)
         axes[1, i].axis("off")
 
-    fig.suptitle(f"Episode {episode_idx} — Saliency Summary", fontsize=12)
+    fig.suptitle(f"Episode {episode_idx} ? Saliency Summary", fontsize=12)
     plt.tight_layout()
     path = os.path.join(out_dir, f"ep{episode_idx:02d}_saliency_summary.png")
     plt.savefig(path, dpi=120, bbox_inches="tight")
     plt.close(fig)
-    print(f"  [saliency] Summary saved → {path}")
+    print(f"  [saliency] Summary saved ? {path}")
 
 
 def run_episode(model, env, episode_idx: int, out_dir: str,
@@ -364,11 +364,11 @@ def run_episode(model, env, episode_idx: int, out_dir: str,
 
     gif_path = os.path.join(out_dir, f"ep{episode_idx:02d}_rollout.gif")
     imageio.mimsave(gif_path, gif_frames, fps=15)
-    print(f"  [video]   Rollout GIF → {gif_path}")
+    print(f"  [video]   Rollout GIF ? {gif_path}")
 
     sal_gif_path = os.path.join(out_dir, f"ep{episode_idx:02d}_saliency.gif")
     imageio.mimsave(sal_gif_path, sal_frames, fps=15)
-    print(f"  [video]   Saliency GIF → {sal_gif_path}")
+    print(f"  [video]   Saliency GIF ? {sal_gif_path}")
 
     if summary_frames_rgb:
         save_saliency_summary(summary_frames_rgb, summary_saliency, episode_idx, out_dir)
@@ -383,13 +383,13 @@ def save_reward_plot(rewards: list, out_dir: str):
                label=f"Mean = {np.mean(rewards):.1f}")
     ax.set_xlabel("Episode")
     ax.set_ylabel("Total Reward")
-    ax.set_title("Evaluation — Episode Rewards")
+    ax.set_title("Evaluation ? Episode Rewards")
     ax.legend()
     plt.tight_layout()
     path = os.path.join(out_dir, "eval_rewards.png")
     plt.savefig(path, dpi=120)
     plt.close(fig)
-    print(f"\n[stats] Reward plot → {path}")
+    print(f"\n[stats] Reward plot ? {path}")
 
 
 def parse_args():
@@ -397,9 +397,9 @@ def parse_args():
     parser.add_argument("--model", type=str, default="sac_pusher_combined.zip",
                         help="Ruta al modelo .zip, nombre sin .zip, o carpeta con model_final.zip")
     parser.add_argument("--vecnorm", type=str, default=None,
-                        help="Path to VecNormalize stats (.pkl) — opcional")
+                        help="Path to VecNormalize stats (.pkl) ? opcional")
     parser.add_argument("--n_episodes", type=int, default=5,
-                        help="Número de episodios a evaluar")
+                        help="N�mero de episodios a evaluar")
     parser.add_argument("--out_dir", type=str, default="./eval_results",
                         help="Directorio de salida para GIFs y figuras")
     parser.add_argument("--saliency_every", type=int, default=10,
@@ -407,9 +407,9 @@ def parse_args():
     parser.add_argument("--device", type=str, default="cuda",
                         help="Dispositivo PyTorch: cuda | cpu")
     parser.add_argument("--img_size", type=int, default=128,
-                    help="Resolución cuadrada usada por el modelo (ej. 64 o 128)")
+                    help="Resoluci�n cuadrada usada por el modelo (ej. 64 o 128)")
     parser.add_argument("--frame_stack_k", type=int, default=3,
-                    help="Número de frames apilados")
+                    help="N�mero de frames apilados")
     
     return parser.parse_args()
 
@@ -450,7 +450,7 @@ def main():
 
     rewards = []
     for ep in range(args.n_episodes):
-        print(f"── Episode {ep} ──────────────────────────────")
+        print(f"?? Episode {ep} ??????????????????????????????")
         env = make_eval_env(img_size=args.img_size, frame_stack_k=args.frame_stack_k)
         r = run_episode(
             model, env,
@@ -462,12 +462,12 @@ def main():
         rewards.append(r)
         env.close()
 
-    print("\n══════════════════════════════════")
+    print("\n??????????????????????????????????")
     print(f"  Episodes     : {args.n_episodes}")
-    print(f"  Mean reward  : {np.mean(rewards):.2f} ± {np.std(rewards):.2f}")
+    print(f"  Mean reward  : {np.mean(rewards):.2f} � {np.std(rewards):.2f}")
     print(f"  Best episode : {np.argmax(rewards)}  ({max(rewards):.2f})")
     print(f"  Worst episode: {np.argmin(rewards)}  ({min(rewards):.2f})")
-    print("══════════════════════════════════\n")
+    print("??????????????????????????????????\n")
 
     save_reward_plot(rewards, args.out_dir)
     print(f"All results saved in: {args.out_dir}")
