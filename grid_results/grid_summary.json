@@ -1,0 +1,163 @@
+[
+  {
+    "run_id": "run000_lr1e-03_mlp32_img64",
+    "hp": {
+      "learning_rate": 0.001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 32,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 64
+    },
+    "metrics": {
+      "mean_reward": 235.4930938,
+      "std_reward": 234.88811424187156,
+      "elapsed_sec": 5059.7,
+      "n_episodes": 3000,
+      "final_ep_rew": 265.30827650000003
+    }
+  },
+  {
+    "run_id": "run001_lr1e-03_mlp32_img128",
+    "hp": {
+      "learning_rate": 0.001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 32,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 128
+    },
+    "metrics": {
+      "mean_reward": -8.172062800000003,
+      "std_reward": 463.54310222322704,
+      "elapsed_sec": 19908.1,
+      "n_episodes": 3000,
+      "final_ep_rew": 328.14857445
+    }
+  },
+  {
+    "run_id": "run002_lr1e-03_mlp64_img64",
+    "hp": {
+      "learning_rate": 0.001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 64,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 64
+    },
+    "metrics": {
+      "mean_reward": 1155.2527894,
+      "std_reward": 220.30201215546197,
+      "elapsed_sec": 5086.9,
+      "n_episodes": 3000,
+      "final_ep_rew": 631.12355185
+    }
+  },
+  {
+    "run_id": "run003_lr1e-03_mlp64_img128",
+    "hp": {
+      "learning_rate": 0.001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 64,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 128
+    },
+    "metrics": {
+      "mean_reward": -298.462758,
+      "std_reward": 53.52456296781059,
+      "elapsed_sec": 20038.0,
+      "n_episodes": 3000,
+      "final_ep_rew": -125.20261149999999
+    }
+  },
+  {
+    "run_id": "run004_lr1e-04_mlp32_img64",
+    "hp": {
+      "learning_rate": 0.0001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 32,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 64
+    },
+    "metrics": {
+      "mean_reward": -28.3619866,
+      "std_reward": 195.97272616375957,
+      "elapsed_sec": 5100.2,
+      "n_episodes": 3000,
+      "final_ep_rew": 91.76891325000001
+    }
+  },
+  {
+    "run_id": "run005_lr1e-04_mlp32_img128",
+    "hp": {
+      "learning_rate": 0.0001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 32,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 128
+    },
+    "metrics": {
+      "mean_reward": -162.654881,
+      "std_reward": 20.576116753468888,
+      "elapsed_sec": 19769.7,
+      "n_episodes": 3000,
+      "final_ep_rew": -101.82528515000001
+    }
+  },
+  {
+    "run_id": "run006_lr1e-04_mlp64_img64",
+    "hp": {
+      "learning_rate": 0.0001,
+      "batch_size": 256,
+      "buffer_size": 100000,
+      "learning_starts": 5000,
+      "train_freq": 1,
+      "gradient_steps": 1,
+      "cnn_output_dim": 256,
+      "mlp_output_dim": 64,
+      "curriculum_steps": 300000,
+      "frame_stack_k": 3,
+      "img_size": 64
+    },
+    "metrics": {
+      "mean_reward": 394.99699899999996,
+      "std_reward": 7.46249301713621,
+      "elapsed_sec": 5065.8,
+      "n_episodes": 3000,
+      "final_ep_rew": 303.04896775
+    }
+  }
+]
