@@ -42,9 +42,9 @@ En esta práctica se estudia el uso del algoritmo Soft Actor-Critic (SAC) en ent
 
 \section{Introducción}
 
-Esta práctica se centra en estudiar el comportamiento de SAC en un entorno \texttt{Pusher-v5} que se caracteriza por ser un entorno de manipulación robótica en simulación física, donde el objetivo del agente es controlar un brazo robótico para empujar un objeto hasta una posición objetivo sobre una superficie plana. A diferencia de los entornos de locomoción, no hay un final del episodio claro donde el agente se cae o se coloca en un ángulo no sano, sino que el final del episodio se determina al cabo de 100 \texttt{steps}. El agente opera en un espacio de acciones continuo, típicamente aplicando torques a las articulaciones del brazo. La función de recompensa combina la distancia entre el objeto y el objetivo, así como la distancia entre el actuador final y el objeto, premiando comportamientos coordinados de aproximación y empuje.
+El entorno \texttt{Pusher-v5} que se caracteriza por ser un entorno de manipulación robótica en simulación física, donde el objetivo del agente es controlar un brazo robótico para empujar un objeto hasta una posición objetivo sobre una superficie plana. A diferencia de los entornos de locomoción, no hay un final del episodio claro donde el agente se cae o se coloca en un ángulo no sano, sino que el final del episodio se determina al cabo de 100 \texttt{steps}. El agente opera en un espacio de acciones continuo, típicamente aplicando torques a las articulaciones del brazo. La función de recompensa combina la distancia entre el objeto y el objetivo, así como la distancia entre el actuador final y el objeto, premiando comportamientos coordinados de aproximación y empuje.
 
-Además, este entorno presenta una dificultad adicional desde el punto de vista del aprendizaje por refuerzo profundo: la tarea puede resolverse a partir de observaciones de baja dimensionalidad, pero se vuelve notablemente más compleja cuando el agente debe aprender desde imágenes. Esto obliga al modelo no solo a aprender una política de control, sino también una representación útil del entorno visual, del actuador, del objeto y del objetivo. En este sentido, la práctica no solo estudia el rendimiento de SAC como algoritmo de control continuo, sino también el impacto de distintas representaciones del estado sobre el proceso de aprendizaje.
+Además, este entorno presenta una dificultad adicional desde el punto de vista del aprendizaje por refuerzo profundo: la tarea puede resolverse a partir de observaciones de baja dimensionalidad, pero se vuelve notablemente más compleja cuando el agente debe aprender desde imágenes. Esto obliga al modelo no solo a aprender una política de control, sino también una representación útil del entorno visual, del actuador, del objeto y del objetivo. En este sentido, no solo estudiamos el rendimiento de SAC como algoritmo de control continuo, sino también el impacto de distintas representaciones del estado sobre el proceso de aprendizaje.
 
 \section{Marco teórico}
 
@@ -113,14 +113,14 @@ Uno de los elementos más importantes del diseño experimental es la modificaci�
 
 Por este motivo, se introdujo un esquema de \textit{curriculum learning} sobre la recompensa que permite descomponer progresivamente el problema. En las primeras fases, el agente recibe mayor señal por aproximarse al objeto, mientras que en etapas posteriores la recompensa se desplaza hacia el empuje del objeto a la meta. Este diseño reduce la dificultad inicial de exploración y hace que la señal de aprendizaje sea más informativa.
 
-Además, este shaping incorpora bonos discretos al alcanzar regiones relevantes del espacio de estados. Estos bonos permiten reforzar de forma más clara la consecución de hitos intermedios, lo que ayuda a acelerar la convergencia. En consecuencia, la recompensa diseñada no solo mide el éxito final de la tarea, sino que también estructura el proceso de aprendizaje del agente.
+Además, este shaping incorpora bonus discretos al alcanzar regiones relevantes del espacio de estados. Estos bonus permiten reforzar de forma más clara la consecución de hitos intermedios, lo que ayuda a acelerar la convergencia.
 
 \textbf{TODO: añadir figura comparativa entre entrenamiento con curriculum reward y entrenamiento sin curriculum reward.}
 
 \textbf{TODO: añadir una tabla pequeña o un esquema con los términos concretos de la recompensa (\textit{reach reward}, \textit{push reward}, bonus y penalización por acción).}
 
 \subsection{Resultados y discusión}
-Inicialmente como se ha comentado completamos una ejecución del experimento exclusivamente con las imagenes como input. Los resultados obtenidos no fueron los esperados, como se puede observar en la Figura \ref{fig:reward_base} la recompensa obtenida no llegaba en ningún momento a ser positiva lo cual indica que el actuador del robot no se acerca lo suficiente al objeto y que el objeto no se acerca lo sufiente al objetivo.
+Inicialmente, como se ha comentado, completamos una ejecución del experimento exclusivamente con las imagenes como input. Los resultados obtenidos no fueron los esperados, como se puede observar en la Figura \ref{fig:reward_base} la recompensa obtenida no llegaba en ningún momento a ser positiva lo cual indica que el actuador del robot no se acerca lo suficiente al objeto y que el objeto no se acerca lo sufiente al objetivo.
 
 \begin{figure}[H]
     \centering
@@ -174,7 +174,7 @@ Adicionalmente, los episodios de evaluación guardados en formato GIF permiten a
 
 \subsubsection{Evaluación cualitativa del agente}
 
-La evaluación final no se limita únicamente a la recompensa total por episodio. También se analiza el comportamiento del agente mediante ejecuciones completas guardadas en formato GIF. Esta evaluación cualitativa resulta especialmente relevante en tareas de manipulación robótica, donde una política puede obtener recompensas similares a otra pero exhibir trayectorias mucho menos estables o menos interpretables.
+La evaluación final no se limita únicamente a la recompensa total por episodio, también se analiza el comportamiento del agente mediante ejecuciones completas guardadas en formato GIF. Esta evaluación cualitativa resulta especialmente relevante en tareas de manipulación robótica, donde una política puede obtener recompensas similares a otra pero exhibir trayectorias mucho menos estables o menos interpretables.
 
 En nuestro caso, los episodios evaluados muestran que el agente aprende una estrategia progresivamente más estructurada. Frente a los movimientos erráticos observados en etapas iniciales del entrenamiento, la política final exhibe un patrón más consistente de aproximación, contacto y empuje. Esta observación refuerza la interpretación de que el modelo no solo mejora numéricamente, sino que también adquiere comportamientos más alineados con la dinámica de la tarea.
 
