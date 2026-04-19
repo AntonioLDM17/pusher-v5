@@ -75,11 +75,11 @@ El diseño de la función de recompensa se basa en un esquema de \textit{curricu
 
 \subsubsection{Procedimiento de evaluación y generación de saliency maps}
 
-Para complementar la evaluación cuantitativa del agente, se implementó un script específico de evaluación que carga el modelo entrenado y ejecuta varios episodios completos en el entorno. Durante esta fase se guardan tanto secuencias visuales del comportamiento del agente como mapas de saliencia calculados sobre la entrada visual.
+Para complementar la evaluación cuantitativa del agente, se implementó un script específico de evaluación que carga el modelo entrenado y ejecuta varios episodios completos en el entorno. Durante esta fase se guardan tanto secuencias visuales del comportamiento del agente como Saliency Maps calculados sobre el input visual del agente.
 
 Los saliency maps se obtienen mediante un método basado en gradientes. En cada estado, se calcula el gradiente del valor \(Q\) asociado a la acción determinista del actor con respecto a la imagen de entrada. A partir de este gradiente, se construye un mapa de relevancia espacial que indica qué regiones visuales influyen más en la decisión del modelo. Posteriormente, este mapa se superpone sobre el frame original para facilitar su interpretación.
 
-Además de generar GIFs completos del comportamiento del agente, el procedimiento de evaluación guarda también GIFs con la superposición de saliency y paneles resumen por episodio. Esto permite analizar no solo el rendimiento final del agente, sino también verificar visualmente que la red aprende a utilizar información relevante del entorno, como la posición del actuador, el objeto y el objetivo.
+Se generan GIFs completos del comportamiento del agente y en evaluación también con la superposición del saliency map y paneles resumen por episodio. Permitiendo así que analicemos, no solo el rendimiento final del agente, sino también poder verificar visualmente que la red aprende a utilizar información relevante del entorno como la posicion del brazo robot, el objeto y el objetivo. 
 
 \begin{table}[H]
 \centering
@@ -154,7 +154,7 @@ De forma complementaria a la evolución de la recompensa, el análisis cualitati
 
 Este comportamiento sugiere que la política aprendida no solo mejora en términos de recompensa acumulada, sino también en términos de estructura del comportamiento. En un entorno de manipulación como \texttt{Pusher-v5}, esta transición resulta especialmente importante, ya que el éxito requiere coordinar varias subtareas consecutivas.
 
-Adicionalmente, los episodios de evaluación guardados en formato GIF permiten analizar de forma cualitativa la política aprendida. En las ejecuciones finales se observa que el agente no solo incrementa la recompensa acumulada, sino que desarrolla una secuencia de acciones más coherente: aproximación al objeto, contacto y empuje progresivo hacia la meta.
+Adicionalmente, los episodios de evaluación permiten analizar de forma cualitativa la política aprendida. En las ejecuciones finales se observa que el agente no solo incrementa la recompensa acumulada, sino que desarrolla una secuencia de acciones más coherente: aproximación al objeto, contacto y empuje progresivo hacia la meta.
 
 \begin{figure}[H]
     \centering
@@ -317,13 +317,13 @@ Este análisis confirma la importancia de una correcta selección de hiperparám
 
 \subsection{Motivación}
 
-Aunque en las secciones anteriores se ha observado que el enfoque multimodal junto con el uso de curriculum learning permite obtener políticas razonables, todavía no está claro qué componentes del sistema son realmente los responsables de esta mejora. Es decir, no basta con comprobar que el modelo completo funciona, sino que resulta necesario entender qué aporta cada una de sus partes.
+Aunque en las secciones anteriores se ha observado que el enfoque multimodal junto con el uso de curriculum learning permite obtener políticas razonables, todavía no está claro qué componentes del sistema son realmente los responsables de esta mejora. Es decir, no basta con comprobar que el modelo completo funciona, sino que tambien se necesita entender qué aporta cada una de las partes.
 
-Con este objetivo, se plantea un estudio de ablación en el que se analizan de forma separada tres elementos clave del proyecto: el uso del reward shaping basado en curriculum, la información tabular propioceptiva y la información visual. Este análisis permite estudiar hasta qué punto el rendimiento final depende de cada uno de estos factores y si realmente todos ellos son necesarios.
+Con este objetivo, se planteó un estudio de ablación en el que se analizó de forma separada tres elementos clave del proyecto: el uso del reward shaping basado en curriculum, la información tabular propioceptiva y la información visual. Este análisis permite estudiar hasta qué punto el rendimiento final depende de cada uno de estos factores y si realmente todos ellos son necesarios.
 
 \subsection{Configuración experimental}
 
-Para que la comparación sea lo más limpia posible, todas las variantes se entrenan manteniendo los mismos hiperparámetros y el mismo entorno, modificando únicamente los componentes que se quieren analizar. En concreto, se consideran las siguientes configuraciones:
+Para que la comparación sea lo más limpia y justa posible, todas las variantes se entrenan manteniendo los mismos hiperparámetros y el mismo entorno, modificando únicamente los componentes que se quieren analizar. En concreto, se consideran las siguientes configuraciones:
 
 \begin{itemize}
     \item \textbf{Multimodal con curriculum}: modelo completo, que utiliza imágenes, features tabulares y reward shaping progresivo.
@@ -335,8 +335,7 @@ Para que la comparación sea lo más limpia posible, todas las variantes se entr
 Todas las variantes se entrenan durante 300\,000 pasos y se evalúan utilizando una misma recompensa común, de forma que la comparación no dependa de la escala de la reward utilizada durante el entrenamiento.
 
 \subsection{Resultados y discusión}
-
-Para analizar los resultados no se ha considerado únicamente la recompensa final, sino también la evolución de la recompensa a lo largo del entrenamiento. Esto permite entender mejor cómo aprende cada modelo, si lo hace de forma estable y si la mejora es progresiva o depende de comportamientos puntuales.
+Para analizar los resultados no se ha considerado solo la recompensa final, sino también su evolución a lo largo del entrenamiento. Esto permite ver mejor cómo aprende cada modelo, si lo hace de forma estable y si la mejora es progresiva o depende de momentos concretos.
 
 \begin{figure}[H]
     \centering
@@ -345,21 +344,21 @@ Para analizar los resultados no se ha considerado únicamente la recompensa fina
     \label{fig:ablation_curves}
 \end{figure}
 
-En la parte superior de la Figura \ref{fig:ablation_curves} se muestra la recompensa de evaluación, que es la métrica más relevante para comparar las distintas configuraciones. Se observa claramente que la variante \textit{multimodal sin curriculum} es la que obtiene mejor rendimiento de forma consistente durante prácticamente todo el entrenamiento. Su curva es además bastante estable, con pocas oscilaciones, lo que indica que el aprendizaje es robusto.
+En la parte superior de la Figura \ref{fig:ablation_curves} se ve la recompensa de evaluación, que es la métrica más importante para comparar las distintas configuraciones. Se observa claramente que la variante \textit{multimodal sin curriculum} es la que mejor rinde durante casi todo el entrenamiento. Además, su curva es bastante estable, con pocas oscilaciones, lo que sugiere un aprendizaje robusto.
 
-Por otro lado, la variante \textit{solo features} alcanza resultados razonables y se sitúa como la segunda mejor configuración. Aunque no llega al nivel de la mejor variante, mantiene un rendimiento relativamente estable y claramente superior al caso de solo imágenes. Esto sugiere que la información tabular contiene gran parte de la señal necesaria para resolver la tarea.
+La variante \textit{solo features} se sitúa la segunda. Aunque no llega al nivel de la mejor configuración, su rendimiento es razonable y mejora por mucho al de solo imagénes. Esto sugiere que la información tabular es la parte más necesaria para resolver la tarea.
 
-La variante \textit{multimodal con curriculum} presenta un comportamiento más irregular. En algunos momentos del entrenamiento se aproxima al rendimiento de \textit{solo features}, pero no consigue superarlo de forma consistente y termina con un resultado ligeramente inferior. Además, se observan más oscilaciones en la curva, lo que indica una mayor inestabilidad.
+La variante \textit{multimodal con curriculum} tiene un comportamiento más irregular. En algunos tramos se acerca a \textit{solo features}, pero no logra superarla al final y termina ligeramente por debajo. Además, la curva oscila más, lo que indica una mayor inestabilidad.
 
-Finalmente, la variante \textit{solo imágenes} queda claramente por debajo del resto durante todo el entrenamiento. No se observa una mejora significativa en ningún momento, lo que indica que, bajo las condiciones de esta práctica, la información visual por sí sola no es suficiente para aprender una política útil.
+Por último, la variante \textit{solo imágenes} queda claramente por debajo del resto durante todo el entrenamiento. Apenas muestra una mejora apreciable, lo que indica que, en las condiciones de esta práctica, la información visual por sí sola no es suficiente para aprender una política útil (eso no significa que no aporte al aprendizaje en la parte multimodal).
 
-La parte inferior de la figura muestra la recompensa de entrenamiento, y aquí aparece un comportamiento interesante. La variante \textit{solo features} alcanza valores muy altos de recompensa durante el entrenamiento, incluso superiores a los del modelo multimodal. Sin embargo, esta ventaja no se traduce completamente en la evaluación final. Algo similar ocurre con la variante \textit{multimodal con curriculum}, que también alcanza recompensas de entrenamiento elevadas pero no consigue el mejor rendimiento en evaluación.
+La parte inferior de la figura muestra la recompensa de entrenamiento, y aquí aparece un resultado interesante. La variante \textit{solo features} alcanza valores muy altos, incluso mejores que los del modelo multimodal. Sin embargo, esa ventaja no se traduce del todo en la evaluación final. Algo parecido ocurre con la variante \textit{multimodal con curriculum}, que también logra recompensas de entrenamiento altas pero no obtiene el mejor rendimiento en evaluación.
 
-En cambio, la variante \textit{multimodal sin curriculum}, que es la mejor en evaluación, presenta valores de recompensa de entrenamiento mucho más modestos y bastante planos. Esto indica que optimizar más la reward durante el entrenamiento no implica necesariamente obtener una mejor política final cuando se evalúa con una métrica común.
+En cambio, la variante \textit{multimodal sin curriculum}, que es la mejor en evaluación, presenta valores de recompensa de entrenamiento más modestos y bastante planos. Esto nos sugiere que optimizar más la reward durante el entrenamiento no implica necesariamente obtener una mejor política final cuando se evalúa con una métrica común.
 
-Este resultado es especialmente relevante, ya que sugiere que el reward shaping introduce una señal de aprendizaje que puede ser útil para guiar la exploración, pero que no siempre está perfectamente alineada con el objetivo final de la tarea.
+Este resultado es relevante, ya que indica que el reward shaping puede ser útil para guiar la exploración, pero no siempre está completamente alineado con el objetivo final de la tarea.
 
-Para completar el análisis, en la Figura \ref{fig:ablation} se muestra un resumen de la evaluación final de cada variante.
+Para completar el análisis, en la Figura \ref{fig:ablation} se muestra un resumen de la evaluación final de cada variante. Esta figura confirma lo observado en las curvas: la mejor configuración es la multimodal sin curriculum, seguida de la variante solo features, mientras que usar únicamente imágenes produce los peores resultados.
 
 \begin{figure}[H]
     \centering
@@ -368,17 +367,25 @@ Para completar el análisis, en la Figura \ref{fig:ablation} se muestra un resum
     \label{fig:ablation}
 \end{figure}
 
-Esta figura confirma las tendencias observadas en las curvas: la mejor configuración es la multimodal sin curriculum, seguida de la variante solo features, mientras que el uso exclusivo de imágenes produce los peores resultados. Además, la diferencia entre variantes es suficientemente grande como para que las conclusiones sean claras.
 
 \subsection{Conclusiones de la Parte 3}
 
-El estudio de ablación permite extraer varias conclusiones importantes. En primer lugar, la información tabular resulta ser fundamental para el aprendizaje de la tarea, ya que incluso sin el canal visual el agente es capaz de aprender políticas razonables. En segundo lugar, el uso exclusivo de imágenes no es suficiente bajo las limitaciones de resolución y computación de esta práctica.
+El estudio de ablación permite extraer varias conclusiones importantes. En primer lugar, la información tabular es fundamental para el aprendizaje de la tarea, ya que incluso sin la parte visual el agente es capaz de aprender políticas razonables. En segundo lugar, el uso exclusivo de imágenes no es suficiente bajo las limitaciones de resolución y computación de esta práctica, quizá con más pasos aprendería a hacerlo, pero con 300k steps está muy lejos de hacerlo.
 
-Por otro lado, la combinación multimodal sí aporta beneficios, pero el uso de curriculum learning en la recompensa no parece mejorar el rendimiento final en este caso. De hecho, la mejor configuración es la que utiliza información multimodal sin aplicar shaping progresivo.
+Por otro lado, la combinación multimodal sí aporta beneficios, pero el uso de curriculum learning en la recompensa no parece mejorar el rendimiento final en este caso. De hecho, la mejor configuración es la que utiliza información multimodal sin aplicar shaping progresivo. 
 
 Finalmente, el análisis conjunto de la recompensa de entrenamiento y de evaluación pone de manifiesto que ambas no siempre cuentan la misma historia. Algunas configuraciones optimizan muy bien la reward interna del entrenamiento, pero no generan las mejores políticas cuando se evalúan con una métrica común. Esto refuerza la importancia de analizar no solo el valor final de la recompensa, sino también la dinámica de aprendizaje y la coherencia entre las distintas métricas.
-\vspace{0.4cm}
-\noindent\textbf{Trabajo futuro.}
+\section{Conclusión general}
+
+A lo largo de este trabajo se ha estudiado el comportamiento de SAC en una tarea de manipulación robótica continua dentro del entorno \texttt{Pusher-v5}. Los resultados obtenidos muestran que el algoritmo es capaz de aprender políticas útiles, pero también que su rendimiento depende en gran medida de cómo se representa el estado, de cómo se diseña la recompensa y de cómo se ajustan los hiperparámetros del entrenamiento.
+
+En primer lugar, se ha comprobado que el uso exclusivo de imágenes no es suficiente para aprender una política estable bajo las restricciones de resolución y coste computacional de esta práctica. En cambio, la incorporación de información tabular propioceptiva mejora claramente el aprendizaje y permite al agente explotar de forma más eficaz la estructura de la tarea. Al mismo tiempo, el análisis de saliency maps muestra que el canal visual sí aporta información relevante, ya que la red centra su atención en el actuador, el objeto y la meta.
+
+En segundo lugar, el estudio de sensibilidad a hiperparámetros confirma que pequeñas variaciones en parámetros como la tasa de aprendizaje o la resolución de entrada pueden producir comportamientos muy distintos. En particular, las configuraciones con imágenes de \(64\times64\) han resultado más eficientes y, en conjunto, más efectivas que las de \(128\times128\), lo que pone de manifiesto la importancia de equilibrar calidad de representación y coste de entrenamiento.
+
+Por último, el estudio de ablación ha permitido entender mejor qué componentes explican realmente la mejora del sistema. Los resultados muestran que la información tabular desempeña un papel fundamental, que el uso exclusivo de imágenes produce los peores resultados y que, en esta implementación concreta, la variante multimodal sin curriculum alcanza el mejor rendimiento final bajo una recompensa común de evaluación. Esto sugiere que una reward de entrenamiento más alta no siempre implica una mejor política final.
+
+\section*{Trabajo futuro}
 
 Como líneas futuras se propone:
 \begin{itemize}
