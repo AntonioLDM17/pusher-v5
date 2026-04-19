@@ -109,18 +109,15 @@ Reward shaping & Curriculum (reach $\rightarrow$ push) \\
 
 \subsection{Análisis del reward shaping}
 
-Uno de los elementos más importantes del diseño experimental es la modificación de la función de recompensa. Aunque el entorno proporciona una recompensa densa, en la práctica el agente tiene dificultades para descubrir desde el inicio la secuencia completa de comportamientos necesarios para resolver la tarea. En particular, acercarse al objeto y empujarlo hacia la meta son subtareas con distinta dificultad y con distinta relevancia según la fase del entrenamiento.
+Uno de los elementos importantes del diseño experimental es la modificación de la función de recompensa. Aunque el entorno proporciona una recompensa densa, en la práctica el agente tiene dificultades para descubrir desde el inicio la secuencia completa de comportamientos necesarios para resolver la tarea. En particular, acercarse al objeto y empujarlo hacia la meta son subtareas con distinta dificultad y con distinta relevancia según la fase del entrenamiento.
 
-Por este motivo, se introdujo un esquema de \textit{curriculum learning} sobre la recompensa que permite descomponer progresivamente el problema. En las primeras fases, el agente recibe mayor señal por aproximarse al objeto, mientras que en etapas posteriores la recompensa se desplaza hacia el empuje del objeto a la meta. Este diseño reduce la dificultad inicial de exploración y hace que la señal de aprendizaje sea más informativa.
+Por este motivo, se introdujo un esquema de \textit{curriculum learning} sobre la recompensa que permite descomponer progresivamente el problema. En las primeras fases, el agente recibe mayor señal por aproximarse al objeto, mientras que en etapas posteriores la recompensa se desplaza hacia el empuje del objeto a la meta. Además, este shaping incorpora bonus discretos al alcanzar regiones relevantes del espacio de estados, lo que ayuda a reforzar hitos intermedios del aprendizaje.
 
-Además, este shaping incorpora bonus discretos al alcanzar regiones relevantes del espacio de estados. Estos bonus permiten reforzar de forma más clara la consecución de hitos intermedios, lo que ayuda a acelerar la convergencia.
-
-\textbf{TODO: añadir figura comparativa entre entrenamiento con curriculum reward y entrenamiento sin curriculum reward.}
-
-\textbf{TODO: añadir una tabla pequeña o un esquema con los términos concretos de la recompensa (\textit{reach reward}, \textit{push reward}, bonus y penalización por acción).}
+El efecto de este diseño de recompensa se discute con más detalle en la Parte 3, donde se compara explícitamente la variante multimodal con curriculum frente a la misma arquitectura sin curriculum dentro del estudio de ablación.
 
 \subsection{Resultados y discusión}
-Inicialmente, como se ha comentado, completamos una ejecución del experimento exclusivamente con las imagenes como input. Los resultados obtenidos no fueron los esperados, como se puede observar en la Figura \ref{fig:reward_base} la recompensa obtenida no llegaba en ningún momento a ser positiva lo cual indica que el actuador del robot no se acerca lo suficiente al objeto y que el objeto no se acerca lo sufiente al objetivo.
+
+Inicialmente, como se ha comentado, completamos una ejecución del experimento exclusivamente con las imagenes como input. Los resultados obtenidos no fueron los esperados. Como se puede observar en la Figura \ref{fig:reward_base}, la recompensa obtenida no llegaba en ningún momento a ser positiva, lo cual indica que el actuador del robot no se acerca lo suficiente al objeto y que el objeto no se acerca lo suficiente al objetivo.
 
 \begin{figure}[H]
     \centering
@@ -129,7 +126,7 @@ Inicialmente, como se ha comentado, completamos una ejecución del experimento e
     \label{fig:reward_base}
 \end{figure}
 
-Posteriormente decidimos implementar un enfoque hibrido usando también las observaciones tabulares como parte del input. Esta decisión lleva a una mejora clara de los resultados, esto se debe principalmenete a que la adición de las posiciones guía el aprendizaje y aporta la estructura 3D del entorno.
+Posteriormente decidimos implementar un enfoque hibrido usando también las observaciones tabulares como parte del input. Esta decisión lleva a una mejora clara de los resultados, principalmente porque la adición de las posiciones guía el aprendizaje y aporta la estructura 3D del entorno.
 
 De manera complementaria, para justificar el uso de las imágenes como input realizamos un estudio de los saliency maps. En el report mostramos el episodio 2 de evaluación, seleccionado por ser representativo del comportamiento del agente y por ofrecer una visualización especialmente clara de la atención del modelo sobre el actuador, el objeto y la región objetivo.
 
@@ -142,15 +139,9 @@ De manera complementaria, para justificar el uso de las imágenes como input rea
 
 Como se puede observar en la Figura \ref{fig:saliency}, el agente utiliza de manera efectiva la información visual para tomar decisiones. La atención del modelo se concentra en el actuador, el objeto y el objetivo, lo que indica que la red aprende a extraer de las imágenes los elementos relevantes de la tarea y a combinarlos con las observaciones tabulares para guiar la política.
 
-La Figura \ref{fig:saliency} permite observar con mayor detalle cómo evoluciona la atención visual del modelo a lo largo de un episodio completo. Este tipo de visualización resulta especialmente útil para comprobar que la red no se limita a explotar artefactos visuales irrelevantes, sino que aprende a centrar la mayor parte de la señal en elementos funcionalmente importantes para la tarea.
+Esta visualización también permite comprobar que la red no se limita a explotar artefactos visuales irrelevantes, sino que centra buena parte de la señal en elementos funcionalmente importantes para la tarea.
 
 Los resultados del experimento principal muestran que el agente es capaz de aprender una política claramente mejor que la obtenida con solo imágenes tras varios cientos de miles de pasos de entrenamiento. Aunque la curva de recompensa sigue presentando oscilaciones, se observa una mejora sostenida del rendimiento y una mayor capacidad del agente para aproximarse al objeto y empujarlo hacia la meta.
-
-A medida que avanza el entrenamiento, se observa:
-\begin{itemize}
-    \item Mejora progresiva en la estabilidad del movimiento.
-    \item Incremento sostenido en la recompensa acumulada.
-\end{itemize}
 
 \begin{figure}[H]
     \centering
@@ -171,21 +162,6 @@ Adicionalmente, los episodios de evaluación guardados en formato GIF permiten a
     \caption{Secuencia de frames extraída del episodio 2 de evaluación. Se observa una política más estructurada, con fases de aproximación al objeto y empuje hacia la región objetivo.}
     \label{fig:rollout_frames}
 \end{figure}
-
-\subsubsection{Evaluación cualitativa del agente}
-
-La evaluación final no se limita únicamente a la recompensa total por episodio, también se analiza el comportamiento del agente mediante ejecuciones completas guardadas en formato GIF. Esta evaluación cualitativa resulta especialmente relevante en tareas de manipulación robótica, donde una política puede obtener recompensas similares a otra pero exhibir trayectorias mucho menos estables o menos interpretables.
-
-En nuestro caso, los episodios evaluados muestran que el agente aprende una estrategia progresivamente más estructurada. Frente a los movimientos erráticos observados en etapas iniciales del entrenamiento, la política final exhibe un patrón más consistente de aproximación, contacto y empuje. Esta observación refuerza la interpretación de que el modelo no solo mejora numéricamente, sino que también adquiere comportamientos más alineados con la dinámica de la tarea.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.45\textwidth]{figuras/eval_rewards.png}
-    \caption{Recompensa total por episodio durante la evaluación final del modelo entrenado.}
-    \label{fig:eval_rewards}
-\end{figure}
-
-La Figura \ref{fig:eval_rewards} resume la variabilidad del rendimiento del modelo en varios episodios de evaluación. Aunque existe cierta dispersión entre episodios, la política final mantiene un comportamiento consistente, lo que sugiere que el aprendizaje no depende de una única trayectoria afortunada, sino que ha capturado una estrategia razonablemente robusta.
 
 \subsection{Conclusiones de la Parte 1}
 
@@ -289,13 +265,6 @@ Canal visual & Aporta información relevante, pero no resulta suficiente por sí
 Además del rendimiento medido en recompensa, el estudio de hiperparámetros permite analizar el coste computacional asociado a cada configuración. En particular, la resolución de entrada tiene un impacto muy relevante sobre el tiempo total de entrenamiento. Las configuraciones con imágenes de mayor tamaño requieren más memoria y aumentan el coste del paso hacia delante y hacia atrás de la red convolucional.
 
 Esto hace que, incluso cuando la mejora en recompensa es pequeña o inexistente, el coste temporal de aumentar la resolución sea muy elevado. Desde el punto de vista práctico, este resultado refuerza la idea de que no siempre una representación visual de mayor calidad implica un mejor aprendizaje, especialmente cuando el agente dispone además de información propioceptiva.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.45\textwidth]{figuras/cost_by_resolution.png}
-    \caption{Coste computacional medio por resolución de imagen. Las configuraciones con \(128\times128\) requieren claramente más tiempo de entrenamiento que las de \(64\times64\).}
-    \label{fig:cost_by_resolution}
-\end{figure}
 
 \begin{table}[H]
 \centering
