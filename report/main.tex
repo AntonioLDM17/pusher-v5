@@ -348,76 +348,66 @@ Este análisis confirma la importancia de una correcta selección de hiperparám
 
 \subsection{Motivación}
 
-Aunque los resultados obtenidos en las secciones anteriores muestran que el enfoque multimodal junto con el curriculum learning permite aprender políticas útiles, todavía queda por responder qué componentes del sistema son realmente responsables de la mejora observada. En otras palabras, no basta con comprobar que el sistema completo funciona; también resulta importante entender la contribución específica de cada una de sus partes.
+Aunque en las secciones anteriores se ha observado que el enfoque multimodal junto con el uso de curriculum learning permite obtener políticas razonables, todavía no está claro qué componentes del sistema son realmente los responsables de esta mejora. Es decir, no basta con comprobar que el modelo completo funciona, sino que resulta necesario entender qué aporta cada una de sus partes.
 
-Con este objetivo, se plantea un estudio de ablación centrado en tres elementos clave del proyecto: el uso del \textit{reward shaping} basado en curriculum, la información tabular propioceptiva y la información visual. Este análisis permite estudiar hasta qué punto el rendimiento final depende de cada una de estas decisiones de diseño.
+Con este objetivo, se plantea un estudio de ablación en el que se analizan de forma separada tres elementos clave del proyecto: el uso del reward shaping basado en curriculum, la información tabular propioceptiva y la información visual. Este análisis permite estudiar hasta qué punto el rendimiento final depende de cada uno de estos factores y si realmente todos ellos son necesarios.
 
 \subsection{Configuración experimental}
 
-Para mantener el coste computacional dentro del tiempo disponible, los experimentos de ablación se plantean manteniendo el resto de hiperparámetros fijos y modificando únicamente los componentes cuyo efecto se quiere aislar. En concreto, se consideran las siguientes variantes:
+Para que la comparación sea lo más limpia posible, todas las variantes se entrenan manteniendo los mismos hiperparámetros y el mismo entorno, modificando únicamente los componentes que se quieren analizar. En concreto, se consideran las siguientes configuraciones:
 
 \begin{itemize}
-    \item \textbf{Multimodal con curriculum}: configuración completa del proyecto, que combina observaciones visuales, observaciones tabulares y reward shaping progresivo.
-    \item \textbf{Multimodal sin curriculum}: misma arquitectura multimodal, pero eliminando el shaping progresivo de la recompensa.
-    \item \textbf{Solo features}: el agente recibe únicamente observaciones tabulares, eliminando por completo la rama visual.
-    \item \textbf{Solo imágenes}: el agente recibe únicamente observaciones visuales, eliminando la información propioceptiva.
+    \item \textbf{Multimodal con curriculum}: modelo completo, que utiliza imágenes, features tabulares y reward shaping progresivo.
+    \item \textbf{Multimodal sin curriculum}: misma arquitectura multimodal, pero sin el esquema de curriculum en la recompensa.
+    \item \textbf{Solo features}: el agente recibe únicamente observaciones tabulares.
+    \item \textbf{Solo imágenes}: el agente recibe únicamente observaciones visuales.
 \end{itemize}
 
-Estas variantes permiten aislar la contribución de la recompensa diseñada y de las dos fuentes principales de información utilizadas en el modelo final. Además, para que la comparación entre configuraciones sea interpretable, las variantes se evalúan mediante una recompensa común, evitando que las conclusiones dependan únicamente de la escala específica de cada shaping durante el entrenamiento.
-
-\textbf{TODO: especificar aquí el número exacto de timesteps usado en las ablaciones finales.}
+Todas las variantes se entrenan durante 300\,000 pasos y se evalúan utilizando una misma recompensa común, de forma que la comparación no dependa de la escala de la reward utilizada durante el entrenamiento.
 
 \subsection{Resultados y discusión}
 
-A diferencia de una comparación basada únicamente en la recompensa final, en esta sección se analiza la evolución temporal de la recompensa durante el entrenamiento para cada una de las configuraciones consideradas. Esta perspectiva resulta más informativa, ya que permite observar no solo qué variante termina mejor, sino también cuál aprende antes, cuál es más estable y cuál presenta trayectorias de aprendizaje más erráticas.
+Para analizar los resultados no se ha considerado únicamente la recompensa final, sino también la evolución de la recompensa a lo largo del entrenamiento. Esto permite entender mejor cómo aprende cada modelo, si lo hace de forma estable y si la mejora es progresiva o depende de comportamientos puntuales.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.48\textwidth]{figuras/ablation_learning_curves.png}
-    \caption{Curvas de recompensa durante el entrenamiento para las distintas variantes del estudio de ablación. La comparación permite analizar diferencias en velocidad de aprendizaje, estabilidad y rendimiento final.}
+    \includegraphics[width=0.48\textwidth]{figuras/ablation_eval_and_training.png}
+    \caption{Arriba: recompensa media de evaluación durante el entrenamiento para cada variante. Abajo: recompensa media por episodio durante el entrenamiento.}
     \label{fig:ablation_curves}
 \end{figure}
 
-La Figura \ref{fig:ablation_curves} constituye el resultado principal del estudio de ablación. A través de estas curvas puede analizarse si la representación multimodal aporta una ventaja sistemática frente a las variantes unimodales, así como el efecto del curriculum reward sobre la estabilidad del aprendizaje. En particular, esta representación permite distinguir entre configuraciones que aprenden rápidamente pero se estancan, configuraciones más lentas pero estables y configuraciones que apenas logran superar la exploración inicial.
+En la parte superior de la Figura \ref{fig:ablation_curves} se muestra la recompensa de evaluación, que es la métrica más relevante para comparar las distintas configuraciones. Se observa claramente que la variante \textit{multimodal sin curriculum} es la que obtiene mejor rendimiento de forma consistente durante prácticamente todo el entrenamiento. Su curva es además bastante estable, con pocas oscilaciones, lo que indica que el aprendizaje es robusto.
 
-Como apoyo complementario, también puede resumirse el comportamiento final de cada variante mediante una figura agregada de evaluación, aunque el foco principal del análisis se sitúa en la dinámica temporal del entrenamiento.
+Por otro lado, la variante \textit{solo features} alcanza resultados razonables y se sitúa como la segunda mejor configuración. Aunque no llega al nivel de la mejor variante, mantiene un rendimiento relativamente estable y claramente superior al caso de solo imágenes. Esto sugiere que la información tabular contiene gran parte de la señal necesaria para resolver la tarea.
+
+La variante \textit{multimodal con curriculum} presenta un comportamiento más irregular. En algunos momentos del entrenamiento se aproxima al rendimiento de \textit{solo features}, pero no consigue superarlo de forma consistente y termina con un resultado ligeramente inferior. Además, se observan más oscilaciones en la curva, lo que indica una mayor inestabilidad.
+
+Finalmente, la variante \textit{solo imágenes} queda claramente por debajo del resto durante todo el entrenamiento. No se observa una mejora significativa en ningún momento, lo que indica que, bajo las condiciones de esta práctica, la información visual por sí sola no es suficiente para aprender una política útil.
+
+La parte inferior de la figura muestra la recompensa de entrenamiento, y aquí aparece un comportamiento interesante. La variante \textit{solo features} alcanza valores muy altos de recompensa durante el entrenamiento, incluso superiores a los del modelo multimodal. Sin embargo, esta ventaja no se traduce completamente en la evaluación final. Algo similar ocurre con la variante \textit{multimodal con curriculum}, que también alcanza recompensas de entrenamiento elevadas pero no consigue el mejor rendimiento en evaluación.
+
+En cambio, la variante \textit{multimodal sin curriculum}, que es la mejor en evaluación, presenta valores de recompensa de entrenamiento mucho más modestos y bastante planos. Esto indica que optimizar más la reward durante el entrenamiento no implica necesariamente obtener una mejor política final cuando se evalúa con una métrica común.
+
+Este resultado es especialmente relevante, ya que sugiere que el reward shaping introduce una señal de aprendizaje que puede ser útil para guiar la exploración, pero que no siempre está perfectamente alineada con el objetivo final de la tarea.
+
+Para completar el análisis, en la Figura \ref{fig:ablation} se muestra un resumen de la evaluación final de cada variante.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{figuras/ablation_comparison.png}
-    \caption{Resumen de evaluación final de las configuraciones del estudio de ablación. Esta figura se interpreta de forma complementaria a las curvas de aprendizaje, no como resultado principal aislado.}
+    \caption{Recompensa media de evaluación final para cada variante del estudio de ablación.}
     \label{fig:ablation}
 \end{figure}
 
-Desde el punto de vista conceptual, este estudio permite validar varias de las hipótesis planteadas a lo largo del trabajo. Si la variante solo imágenes vuelve a mostrar un rendimiento pobre, se refuerza la idea de que el canal visual, por sí solo, no resulta suficiente bajo las restricciones computacionales de esta práctica. Si la variante solo features aprende mejor que la variante solo imágenes, podrá concluirse que gran parte de la señal útil de control se encuentra en la información tabular. Finalmente, la comparación entre las dos variantes multimodales permitirá valorar hasta qué punto el curriculum reward facilita la exploración y acelera el aprendizaje.
-
-\textbf{TODO: sustituir este bloque por la interpretación final cuando estén disponibles las curvas definitivas de ablación.}
+Esta figura confirma las tendencias observadas en las curvas: la mejor configuración es la multimodal sin curriculum, seguida de la variante solo features, mientras que el uso exclusivo de imágenes produce los peores resultados. Además, la diferencia entre variantes es suficientemente grande como para que las conclusiones sean claras.
 
 \subsection{Conclusiones de la Parte 3}
 
-El estudio de ablación permite complementar los resultados anteriores, ya que no solo muestra qué configuración funciona mejor, sino también por qué. Este tipo de análisis es especialmente relevante en proyectos de aprendizaje por refuerzo profundo, donde múltiples componentes interactúan entre sí y pueden influir de manera no trivial en la estabilidad del aprendizaje.
+El estudio de ablación permite extraer varias conclusiones importantes. En primer lugar, la información tabular resulta ser fundamental para el aprendizaje de la tarea, ya que incluso sin el canal visual el agente es capaz de aprender políticas razonables. En segundo lugar, el uso exclusivo de imágenes no es suficiente bajo las limitaciones de resolución y computación de esta práctica.
 
-En particular, este estudio puede ayudar a clarificar si la mejora observada en el enfoque final proviene principalmente del uso de una representación multimodal, del reward shaping o de la combinación de ambos. De esta forma, la discusión final del proyecto no se limita a reportar resultados, sino que aporta una interpretación más profunda de las decisiones de diseño adoptadas.
+Por otro lado, la combinación multimodal sí aporta beneficios, pero el uso de curriculum learning en la recompensa no parece mejorar el rendimiento final en este caso. De hecho, la mejor configuración es la que utiliza información multimodal sin aplicar shaping progresivo.
 
-\section{Conclusiones generales}
-
-SAC se confirma como un algoritmo robusto para problemas de control continuo, capaz de manejar tareas de manipulación en entornos simulados.
-
-Sin embargo, su aplicación práctica requiere:
-\begin{itemize}
-    \item Alto coste computacional.
-    \item Ajuste cuidadoso de hiperparámetros.
-    \item Diseños adecuados de observación y recompensa.
-\end{itemize}
-
-La extensión a tareas de manipulación robótica introduce desafíos adicionales relacionados con el uso exclusivo de imagenes, lo que representa una línea interesante de investigación futura.
-
-Además, los experimentos realizados muestran que la representación del estado juega un papel tan importante como el propio algoritmo de control. En este trabajo se observa que el aprendizaje exclusivamente visual no resulta suficiente bajo restricciones realistas de cómputo y resolución, mientras que la combinación de observaciones visuales y tabulares proporciona una representación más rica y más fácil de explotar por el agente.
-
-De forma complementaria, tanto el análisis de hiperparámetros como el estudio de ablación apuntan a que el reward shaping mediante curriculum learning constituye una de las decisiones de diseño más relevantes del proyecto. Por tanto, el trabajo sugiere que, en tareas de manipulación robótica complejas, el rendimiento final depende no solo de elegir un buen algoritmo de RL, sino también de construir cuidadosamente la representación y la señal de aprendizaje.
-
-Por último, la evaluación cualitativa mediante GIFs y mapas de saliencia refuerza la interpretación de los resultados cuantitativos. No solo se observa una mejora en la recompensa, sino también una política visualmente más estructurada y una atención del modelo concentrada en las regiones relevantes del entorno.
-
+Finalmente, el análisis conjunto de la recompensa de entrenamiento y de evaluación pone de manifiesto que ambas no siempre cuentan la misma historia. Algunas configuraciones optimizan muy bien la reward interna del entrenamiento, pero no generan las mejores políticas cuando se evalúan con una métrica común. Esto refuerza la importancia de analizar no solo el valor final de la recompensa, sino también la dinámica de aprendizaje y la coherencia entre las distintas métricas.
 \vspace{0.4cm}
 \noindent\textbf{Trabajo futuro.}
 

@@ -1,0 +1,54 @@
+[
+  {
+    "variant": "multimodal_curriculum",
+    "metrics": {
+      "mean_reward": -154.3768646,
+      "std_reward": 20.70961913134208,
+      "elapsed_sec": 5081.4,
+      "n_episodes": 3000,
+      "final_ep_rew": 491.40082155,
+      "train_use_curriculum": true,
+      "eval_use_curriculum": false,
+      "eval_common_reward": true
+    }
+  },
+  {
+    "variant": "multimodal_no_curriculum",
+    "metrics": {
+      "mean_reward": -29.252924999999998,
+      "std_reward": 3.628949094766196,
+      "elapsed_sec": 5121.0,
+      "n_episodes": 3000,
+      "final_ep_rew": -33.13564629999999,
+      "train_use_curriculum": false,
+      "eval_use_curriculum": false,
+      "eval_common_reward": true
+    }
+  },
+  {
+    "variant": "features_only",
+    "metrics": {
+      "mean_reward": -131.5044668,
+      "std_reward": 13.07676790586591,
+      "elapsed_sec": 1288.5,
+      "n_episodes": 3000,
+      "final_ep_rew": 861.9443465500001,
+      "train_use_curriculum": true,
+      "eval_use_curriculum": false,
+      "eval_common_reward": true
+    }
+  },
+  {
+    "variant": "images_only",
+    "metrics": {
+      "mean_reward": -228.70779480000002,
+      "std_reward": 4.148329975871798,
+      "elapsed_sec": 5028.1,
+      "n_episodes": 3000,
+      "final_ep_rew": -199.48271735,
+      "train_use_curriculum": true,
+      "eval_use_curriculum": false,
+      "eval_common_reward": true
+    }
+  }
+]
