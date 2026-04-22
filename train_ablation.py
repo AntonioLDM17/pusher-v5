@@ -142,7 +142,7 @@ class DictObservationWrapper(gym.ObservationWrapper):
 class CurriculumRewardWrapper(gym.Wrapper):
     """
     Reward shaping usado SOLO para entrenamiento cuando se activa.
-    No debe usarse en evaluaci�n comparativa si queremos rewards comparables.
+    No debe usarse en evaluación comparativa si queremos rewards comparables.
     """
     def __init__(self, env, total_steps: int = 100_000):
         super().__init__(env)
@@ -572,7 +572,7 @@ def main():
         )
         all_results.append({"variant": variant, "metrics": metrics})
         print(
-            f"mean_reward={metrics['mean_reward']:.2f} � {metrics['std_reward']:.2f} | "
+            f"mean_reward={metrics['mean_reward']:.2f} ó {metrics['std_reward']:.2f} | "
             f"time={metrics['elapsed_sec']:.0f}s"
         )
 

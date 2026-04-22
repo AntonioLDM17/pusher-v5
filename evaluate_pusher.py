@@ -231,7 +231,7 @@ def resolve_model_path(model_arg: str) -> str:
                 return c
 
     raise FileNotFoundError(
-        f"No se encontr� el modelo en '{model_arg}'. "
+        f"No se encontró el modelo en '{model_arg}'. "
         f"Prueba con una ruta .zip existente, por ejemplo "
         f"'./grid_results/run002_lr1e-03_mlp64_img64/model_final.zip'."
     )
@@ -399,7 +399,7 @@ def parse_args():
     parser.add_argument("--vecnorm", type=str, default=None,
                         help="Path to VecNormalize stats (.pkl) ? opcional")
     parser.add_argument("--n_episodes", type=int, default=5,
-                        help="N�mero de episodios a evaluar")
+                        help="Nómero de episodios a evaluar")
     parser.add_argument("--out_dir", type=str, default="./eval_results",
                         help="Directorio de salida para GIFs y figuras")
     parser.add_argument("--saliency_every", type=int, default=10,
@@ -407,9 +407,9 @@ def parse_args():
     parser.add_argument("--device", type=str, default="cuda",
                         help="Dispositivo PyTorch: cuda | cpu")
     parser.add_argument("--img_size", type=int, default=128,
-                    help="Resoluci�n cuadrada usada por el modelo (ej. 64 o 128)")
+                    help="Resolución cuadrada usada por el modelo (ej. 64 o 128)")
     parser.add_argument("--frame_stack_k", type=int, default=3,
-                    help="N�mero de frames apilados")
+                    help="Nómero de frames apilados")
     
     return parser.parse_args()
 
@@ -464,7 +464,7 @@ def main():
 
     print("\n??????????????????????????????????")
     print(f"  Episodes     : {args.n_episodes}")
-    print(f"  Mean reward  : {np.mean(rewards):.2f} � {np.std(rewards):.2f}")
+    print(f"  Mean reward  : {np.mean(rewards):.2f} ó {np.std(rewards):.2f}")
     print(f"  Best episode : {np.argmax(rewards)}  ({max(rewards):.2f})")
     print(f"  Worst episode: {np.argmin(rewards)}  ({min(rewards):.2f})")
     print("??????????????????????????????????\n")

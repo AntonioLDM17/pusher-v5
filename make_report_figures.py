@@ -61,7 +61,7 @@ def save_cost_by_resolution(results, out_path: str):
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels([f"{k}x{k}" for k in labels])
     ax.set_ylabel("Tiempo de entrenamiento (horas)")
-    ax.set_title("Coste computacional por resoluci�n")
+    ax.set_title("Coste computacional por resolución")
     plt.tight_layout()
     plt.savefig(out_path, dpi=140)
     plt.close(fig)
@@ -94,11 +94,11 @@ def make_latex_tables(results, out_path: str):
         "% ---- Cost by resolution ----",
         "\\begin{table}[H]",
         "\\centering",
-        "\\caption{Coste computacional medio por resoluci�n de imagen.}",
+        "\\caption{Coste computacional medio por resolución de imagen.}",
         "\\label{tab:cost_by_resolution}",
         "\\begin{tabular}{lcc}",
         "\\toprule",
-        "Resoluci�n & Tiempo medio (h) & Reward medio \\\\",
+        "Resolución & Tiempo medio (h) & Reward medio \\\\",
         "\\midrule",
     ]
     for img in sorted(by_res.keys()):
@@ -118,13 +118,13 @@ def make_latex_tables(results, out_path: str):
         "\\label{tab:grid_best_worst_stable}",
         "\\begin{tabular}{p{2.0cm}p{4.0cm}}",
         "\\toprule",
-        "Categor�a & Configuraci�n \\\\",
+        "Categoróa & Configuración \\\\",
         "\\midrule",
         f"Mejor run & {best['run_id'].replace('_', '\\_')} "
         f"(reward={best['metrics']['mean_reward']:.1f}, std={best['metrics']['std_reward']:.1f}) \\\\",
         f"Peor run & {worst['run_id'].replace('_', '\\_')} "
         f"(reward={worst['metrics']['mean_reward']:.1f}, std={worst['metrics']['std_reward']:.1f}) \\\\",
-        f"M�s estable & {stable['run_id'].replace('_', '\\_')} "
+        f"Mós estable & {stable['run_id'].replace('_', '\\_')} "
         f"(reward={stable['metrics']['mean_reward']:.1f}, std={stable['metrics']['std_reward']:.1f}) \\\\",
         "\\bottomrule",
         "\\end{tabular}",
